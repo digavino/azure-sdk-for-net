@@ -14,7 +14,7 @@ param (
   # list of http status codes count as broken links. Defaults to 400, 401, 404, SocketError.HostNotFound = 11001, SocketError.NoData = 11004
   [array] $errorStatusCodes = @(400, 401, 404, 11001, 11004),
   # regex to check if the link needs to be replaced
-  [string] $branchReplaceRegex = "^(https://github.com/.*/(?:blob|tree)/)master(/.*)$",
+  [string] $branchReplaceRegex = "",
   # the substitute branch name or SHA commit
   [string] $branchReplacementName = "",
   # flag to allow checking against azure sdk link guidance. Check link guidance here: https://aka.ms/azsdk/guideline/links
@@ -29,6 +29,10 @@ $locale = "/en-us/"
 $emptyLinkMessage = "There is at least one empty link in the page. Please replace with absolute link. Check here for more information: https://aka.ms/azsdk/guideline/links"
 if (!$userAgent) {
   $userAgent = "Chrome/87.0.4280.88"
+}
+if (!$branchReplaceRegex) {
+  $defaultBranch = (git remote show origin | Out-String) -replace "(?ms).*HEAD branch: (\w+).*", '$1'
+  $branchReplaceRegex = "^(https://github.com/.*/(?:blob|tree)/)$defaultBranch(/.*)$"
 }
 function NormalizeUrl([string]$url){
   if (Test-Path $url) {
