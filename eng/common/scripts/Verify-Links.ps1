@@ -1,25 +1,69 @@
+<#
+  .SYNOPSIS
+  Check broken links.
+
+  .DESCRIPTION
+  The Verify-Links.ps1 script will check whether the files contain any broken links.
+
+  .PARAMETER urls
+  Specify url list to verify links. Can either be a http address or a local file request. Local file paths support md and html files.
+
+  .PARAMETER ignoreLinksFile
+  Specifies the file that contains a set of links to ignore when verifying.
+
+  .PARAMETER devOpsLogging
+  Switch that will enable devops specific logging for warnings  
+
+  .PARAMETER recursive
+  Check the links recurisvely based on recursivePattern.  
+  
+  .PARAMETER baseUrl
+  Recusiving check links for all links verified that begin with this baseUrl, defaults to the folder the url is contained in.
+  
+  .PARAMETER rootUrl
+  Path to the root of the site for resolving rooted relative links, defaults to host root for http and file directory for local files.  
+  
+  .PARAMETER errorStatusCodes
+  List of http status codes count as broken links. Defaults to 400, 401, 404, SocketError.HostNotFound = 11001, SocketError.NoData = 11004.  
+  
+  .PARAMETER branchReplaceRegex
+  Regex to check if the link needs to be replaced.  
+  
+  .PARAMETER branchReplacementName
+  The substitute branch name or SHA commit.  
+  
+  .PARAMETER checkLinkGuidance
+  Flag to allow checking against azure sdk link guidance. Check link guidance here: https://aka.ms/azsdk/guideline/links.  
+  
+  .PARAMETER userAgent
+  UserAgent to be configured for web request. Default to current Chrome version. .
+
+  .INPUTS
+  None. You cannot pipe objects to Update-Month.ps1.
+
+  .OUTPUTS
+  None. Update-Month.ps1 does not generate any output.
+
+  .EXAMPLE
+  PS> .\Update-Month.ps1
+
+  .EXAMPLE
+  PS> .\Update-Month.ps1 -inputpath C:\Data\January.csv
+
+  .EXAMPLE
+  PS> .\Update-Month.ps1 -inputpath C:\Data\January.csv -outputPath C:\Reports\2009\January.csv
+#>
 param (
-  # url list to verify links. Can either be a http address or a local file request. Local file paths support md and html files.	
   [string[]] $urls,
-  # file that contains a set of links to ignore when verifying
   [string] $ignoreLinksFile = "$PSScriptRoot/ignore-links.txt",
-  # switch that will enable devops specific logging for warnings
   [switch] $devOpsLogging = $false,
-  # check the links recurisvely based on recursivePattern
   [switch] $recursive = $true,
-  # recusiving check links for all links verified that begin with this baseUrl, defaults to the folder the url is contained in
   [string] $baseUrl = "",
-  # path to the root of the site for resolving rooted relative links, defaults to host root for http and file directory for local files
   [string] $rootUrl = "",
-  # list of http status codes count as broken links. Defaults to 400, 401, 404, SocketError.HostNotFound = 11001, SocketError.NoData = 11004
   [array] $errorStatusCodes = @(400, 401, 404, 11001, 11004),
-  # regex to check if the link needs to be replaced
   [string] $branchReplaceRegex = "",
-  # the substitute branch name or SHA commit
   [string] $branchReplacementName = "",
-  # flag to allow checking against azure sdk link guidance. Check link guidance here: https://aka.ms/azsdk/guideline/links
   [bool] $checkLinkGuidance = $false,
-  # UserAgent to be configured for web request. Default to current Chrome version. 
   [string] $userAgent
 )
 
@@ -29,10 +73,6 @@ $locale = "/en-us/"
 $emptyLinkMessage = "There is at least one empty link in the page. Please replace with absolute link. Check here for more information: https://aka.ms/azsdk/guideline/links"
 if (!$userAgent) {
   $userAgent = "Chrome/87.0.4280.88"
-}
-if (!$branchReplaceRegex) {
-  $defaultBranch = (git remote show origin | Out-String) -replace "(?ms).*HEAD branch: (\w+).*", '$1'
-  $branchReplaceRegex = "^(https://github.com/.*/(?:blob|tree)/)$defaultBranch(/.*)$"
 }
 function NormalizeUrl([string]$url){
   if (Test-Path $url) {
