@@ -39,19 +39,19 @@
   UserAgent to be configured for web request. Default to current Chrome version. .
 
   .INPUTS
-  None. You cannot pipe objects to Update-Month.ps1.
+  None. Requried input $urls
 
   .OUTPUTS
-  None. Update-Month.ps1 does not generate any output.
+  None. Verify-Links.ps1 does not generate any output.
 
   .EXAMPLE
-  PS> .\Update-Month.ps1
+  PS> .\Verify-Links.ps1 -urls C:\README.md
 
   .EXAMPLE
-  PS> .\Update-Month.ps1 -inputpath C:\Data\January.csv
+  PS> .\Verify-Links.ps1 -urls C:\README.md
 
   .EXAMPLE
-  PS> .\Update-Month.ps1 -inputpath C:\Data\January.csv -outputPath C:\Reports\2009\January.csv
+  PS> .\Verify-Links -urls C:\README.md -checkLinkGuidance $true
 #>
 param (
   [string[]] $urls,
