@@ -1,3 +1,6 @@
+parameters:
+  WorkingDirectory: '$(System.DefaultWorkingDirectory)'
+  RemoteRepo: 'origin'
 steps:
 - pwsh: |
     $setDefaultBranch = (git remote show origin | Out-String) -replace "(?ms).*HEAD branch: (\w+).*", '$1'
